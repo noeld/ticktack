@@ -1,5 +1,5 @@
 /*build*/
 .cache/
-*.sublime-*
+*.sublime-workspace
 compile_commands.json
 

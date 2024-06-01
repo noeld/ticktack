@@ -1,0 +1,74 @@
+{
+	"folders":
+	[
+		{
+			"path": ".",
+		}
+	],
+	"settings": {
+		"cmake": {
+			"build_folder": "$folder/build",
+			"command_line_overrides": {
+				"BUILD_SHARED_LIBS": true,
+				"CMAKE_BUILD_TYPE": "Debug",
+				"CMAKE_EXPORT_COMPILE_COMMANDS": true,
+				"CMAKE_TOOLCHAIN_FILE": "~/.vcpkg-clion/vcpkg/scripts/buildsystems/vcpkg.cmake",
+			},
+			"generator": "Ninja",
+		},
+	},
+	"build_systems":
+	[
+		{
+			"config": "Debug",
+			"env":
+			{
+			},
+			"generator": "Ninja",
+			"name": "Debug",
+			"target": "cmake_build",
+			"variants":
+			[
+				{
+					"build_target": "ticktack",
+					"name": "ticktack"
+				},
+				{
+					"artifact": "ticktack",
+					"build_target": "ticktack",
+					"name": "Run: ticktack",
+					"target": "cmake_run"
+				},
+				{
+					"artifact": "ticktack",
+					"build_target": "ticktack",
+					"debug": true,
+					"name": "Run under GDB: ticktack",
+					"target": "cmake_run"
+				},
+				{
+					"build_target": "tt_tests",
+					"name": "tt_tests"
+				},
+				{
+					"artifact": "tests/tt_tests",
+					"build_target": "tt_tests",
+					"name": "Run: tt_tests",
+					"target": "cmake_run"
+				},
+				{
+					"artifact": "tests/tt_tests",
+					"build_target": "tt_tests",
+					"debug": true,
+					"name": "Run under GDB: tt_tests",
+					"target": "cmake_run"
+				},
+				{
+					"name": "ctest",
+					"target": "ctest_run"
+				}
+			],
+			"working_dir": "$folder/build"
+		}
+	],
+}

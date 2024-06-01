@@ -12,9 +12,14 @@ endif()
 
 include_directories(include)
 
-file(GLOB SRC "src/*" "include/*")
+
+add_library(tt SHARED src/tt.cpp include/ticktack/tt.h)
+target_compile_options(tt INTERFACE -Wall -Wconversion -Werror)
+
+file(GLOB SRC "src/main.cpp" "include/tt.h")
 add_executable(${PROJECT_NAME} ${SRC})
-target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wconversion -Werror)
+# target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wconversion -Werror)
+target_link_libraries(${PROJECT_NAME} tt)
 
 enable_testing()
 
