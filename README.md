@@ -1,6 +1,8 @@
 # ticktack
 
-A simple tick-tack-toe implementation.
+A simple tick-tack-toe implementation. I wasn't interested in the game, but in
+the things I could learn along the way, especially testing and TDD
+with *doctest*.
 
 ## Build
 

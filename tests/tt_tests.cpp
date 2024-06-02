@@ -90,7 +90,6 @@ TEST_CASE("Check win condition") {
     SUBCASE("negative win condition") {
         b.clear();
         auto result = b.check_winner();
-        CHECK(result == false);
         CHECK(result.has_value() == false);
     }
     SUBCASE("positive win condition horizontal") {
@@ -99,7 +98,7 @@ TEST_CASE("Check win condition") {
                 b.clear();
                 three(b, player, 0, 1, x);
                 auto result = b.check_winner();
-                CHECK(result == true);
+                CHECK((bool)(result) == true);
                 CHECK(result.value() == player);
             }
         }
@@ -110,7 +109,7 @@ TEST_CASE("Check win condition") {
                 b.clear();
                 three(b, player, 1, 0, 0, y);
                 auto result = b.check_winner();
-                CHECK(result == true);
+                CHECK((bool)(result) == true);
                 CHECK(result.value() == player);
             }
         }
@@ -122,7 +121,7 @@ TEST_CASE("Check win condition") {
                 b.clear();
                 three(b, player, 1, 1);
                 auto result = b.check_winner();
-                CHECK(result == true);
+                CHECK((bool)(result) == true);
                 CHECK(result.value() == player);
             }
             {
@@ -130,20 +129,10 @@ TEST_CASE("Check win condition") {
                 b.clear();
                 three(b, player, 1, -1, 0, 2);
                 auto result = b.check_winner();
-                CHECK(result == true);
+                CHECK((bool)(result) == true);
                 CHECK(result.value() == player);
             }
         }
     }
 
 }
-
-// TEST_CASE("Check win condition") {
-//     ticktack::Board b;
-//     ticktack::Board::data_type dt;
-//     for(unsigned x = 0; x < 2; ++x) {
-//         std::ranges::fill(dt, ' ');
-//         for(unsigned y = 0; y < 2; ++y)
-//             dt
-//     }
-// }

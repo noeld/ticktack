@@ -74,7 +74,34 @@ namespace ticktack {
         }
 
         auto check_winner() const -> std::optional<typename data_type::value_type> {
-
+            static const Position triplets[][3] = {
+                { Position::top_left, Position::top_middle, Position::top_right},
+                { Position::middle_left, Position::middle_middle, Position::middle_right},
+                { Position::bottom_left, Position::bottom_middle, Position::bottom_right},
+                { Position::top_left, Position::middle_left, Position::bottom_left},
+                { Position::top_middle, Position::middle_middle, Position::bottom_middle},
+                { Position::top_right, Position::middle_right, Position::bottom_right},
+                { Position::top_left, Position::middle_middle, Position::bottom_right},
+                { Position::top_right, Position::middle_middle, Position::bottom_left}
+            };
+            for(auto const & t : triplets) {
+                unsigned x_cnt = 0, o_cnt = 0;
+                for(auto const & p : t) {
+                    switch(at(p)) {
+                    case CHAR_O:
+                        o_cnt++;
+                        break;
+                    case CHAR_X:
+                        x_cnt++;
+                        break;
+                        // none
+                    }
+                }
+                if (x_cnt == 3)
+                    return std::make_optional(CHAR_X);
+                if (o_cnt == 3)
+                    return std::make_optional(CHAR_O);
+            }
             return {};
         }
     protected:
