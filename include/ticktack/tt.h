@@ -73,17 +73,8 @@ namespace ticktack {
             std::ranges::copy(data, data_.begin());
         }
 
+        static Position const triplets[8][3];
         auto check_winner() const -> std::optional<typename data_type::value_type> {
-            static const Position triplets[][3] = {
-                { Position::top_left, Position::top_middle, Position::top_right},
-                { Position::middle_left, Position::middle_middle, Position::middle_right},
-                { Position::bottom_left, Position::bottom_middle, Position::bottom_right},
-                { Position::top_left, Position::middle_left, Position::bottom_left},
-                { Position::top_middle, Position::middle_middle, Position::bottom_middle},
-                { Position::top_right, Position::middle_right, Position::bottom_right},
-                { Position::top_left, Position::middle_middle, Position::bottom_right},
-                { Position::top_right, Position::middle_middle, Position::bottom_left}
-            };
             for(auto const & t : triplets) {
                 unsigned x_cnt = 0, o_cnt = 0;
                 for(auto const & p : t) {
@@ -107,6 +98,15 @@ namespace ticktack {
     protected:
     private:
         data_type data_; // space ' ' | 'X' | 'O'
+    };
+
+    class BoardDisplay {
+    public:
+        void print(Board const & board) {
+
+        }
+    protected:
+    private:
     };
 
 } // namespace ticktack
