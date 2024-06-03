@@ -1,5 +1,7 @@
 #include <algorithm>
 #include <initializer_list>
+#include <limits>
+#include <optional>
 #include <random>
 #include <stdexcept>
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
@@ -135,4 +137,125 @@ TEST_CASE("Check win condition") {
         }
     }
 
+}
+
+TEST_CASE("Check Position") {
+    auto const &top_left =  ticktack::Board::Position::top_left;
+    auto const &top_middle = ticktack::Board::Position::top_middle;
+    auto const &top_right = ticktack::Board::Position::top_right;
+    auto const &middle_left = ticktack::Board::Position::middle_left;
+    auto const &middle_middle = ticktack::Board::Position::middle_middle;
+    auto const &middle_right = ticktack::Board::Position::middle_right;
+    auto const &bottom_left = ticktack::Board::Position::bottom_left;
+    auto const &bottom_middle = ticktack::Board::Position::bottom_middle;
+    auto const &bottom_right = ticktack::Board::Position::bottom_right;
+
+    CHECK(top_left.up()         == top_left);
+    CHECK(top_left.right()      == top_middle);
+    CHECK(top_left.down()       == middle_left);
+    CHECK(top_left.left()       == top_left);
+    CHECK(top_middle.up()       == top_middle);
+    CHECK(top_middle.right()    == top_right);
+    CHECK(top_middle.down()     == middle_middle);
+    CHECK(top_middle.left()     == top_left);
+    CHECK(top_right.up()        == top_right);
+    CHECK(top_right.right()     == top_right);
+    CHECK(top_right.down()      == middle_right);
+    CHECK(top_right.left()      == top_middle);
+    CHECK(middle_left.up()      == top_left);
+    CHECK(middle_left.right()   == middle_middle);
+    CHECK(middle_left.down()    == bottom_left);
+    CHECK(middle_left.left()    == middle_left);
+    CHECK(middle_middle.up()    == top_middle);
+    CHECK(middle_middle.right() == middle_right);
+    CHECK(middle_middle.down()  == bottom_middle);
+    CHECK(middle_middle.left()  == middle_left);
+    CHECK(middle_right.up()     == top_right);
+    CHECK(middle_right.right()  == middle_right);
+    CHECK(middle_right.down()   == bottom_right);
+    CHECK(middle_right.left()   == middle_middle);
+    CHECK(bottom_left.up()      == middle_left);
+    CHECK(bottom_left.right()   == bottom_middle);
+    CHECK(bottom_left.down()    == bottom_left);
+    CHECK(bottom_left.left()    == bottom_left);
+    CHECK(bottom_middle.up()    == middle_middle);
+    CHECK(bottom_middle.right() == bottom_right);
+    CHECK(bottom_middle.down()  == bottom_middle);
+    CHECK(bottom_middle.left()  == bottom_left);
+    CHECK(bottom_right.up()     == middle_right);
+    CHECK(bottom_right.right()  == bottom_right);
+    CHECK(bottom_right.down()   == bottom_right);
+    CHECK(bottom_right.left()   == bottom_middle);
+
+}
+
+TEST_CASE("Check validate_char") {
+    for (int c = std::numeric_limits<char>::lowest();
+        c <= std::numeric_limits<char>::max();
+        ++c) {
+        char cc = static_cast<char>(c);
+        switch(cc) {
+        case ticktack::Board::CHAR_VOID: [[ fallthrough]];
+        case ticktack::Board::CHAR_O: [[fallthrough]];
+        case ticktack::Board::CHAR_X:
+            CHECK_NOTHROW(ticktack::Board::validate_char(cc));
+            break;
+        default:
+            CHECK_THROWS_AS(ticktack::Board::validate_char(cc), std::out_of_range);
+        }
+    }
+}
+
+TEST_CASE("Check set") {
+    ticktack::Board b;
+    SUBCASE("Positive set test") {
+        for(auto const & pos : ticktack::Board::Position::all_positions) {
+            for(auto c : ticktack::Board::valid_chars) {
+                b.clear();
+                REQUIRE(b.at(pos) == ticktack::Board::CHAR_VOID);
+                CHECK_NOTHROW(b.set(pos, c));
+                CHECK(b.at(pos) == c);
+            }
+        }
+    }
+    SUBCASE("Negative set test") {
+        auto pos = ticktack::Board::Position::all_positions[0];
+        b.clear();
+        REQUIRE(b.at(pos) == ticktack::Board::CHAR_VOID);
+        char const invalid_char = 'k';
+        CHECK_THROWS_AS(b.set(pos, invalid_char), std::out_of_range);
+        CHECK(b.at(pos) == ticktack::Board::CHAR_VOID);
+    }
+}
+
+TEST_CASE("Check other_player") {
+    for (int c = std::numeric_limits<char>::lowest();
+        c <= std::numeric_limits<char>::max();
+        ++c) {
+        char cc = static_cast<char>(c);
+        switch(cc) {
+        case ticktack::Board::CHAR_VOID:
+            CHECK_NOTHROW(ticktack::Board::other_player(cc));
+            CHECK(ticktack::Board::CHAR_VOID == ticktack::Board::other_player(cc));
+            break;
+        case ticktack::Board::CHAR_O:
+            CHECK_NOTHROW(ticktack::Board::other_player(cc));
+            CHECK(ticktack::Board::CHAR_X == ticktack::Board::other_player(cc));
+            break;
+        case ticktack::Board::CHAR_X:
+            CHECK_NOTHROW(ticktack::Board::other_player(cc));
+            CHECK(ticktack::Board::CHAR_O == ticktack::Board::other_player(cc));
+            break;
+        default:
+            CHECK_THROWS_AS(ticktack::Board::other_player(cc), std::out_of_range);
+        }
+    }
+}
+
+TEST_CASE("Check decode") {
+    CHECK(ticktack::decode(1, 1, '1', '0') == '1');
+    CHECK(ticktack::decode(0, 1, '1', '0', 1, '1', ' ') == '0');
+    CHECK(ticktack::decode('X', 1, '1', '0') == '1');
+    CHECK(ticktack::decode(1, 1, '1', '0') == '1');
+    CHECK(ticktack::decode(1, 1, '1', '0') == '1');
 }
