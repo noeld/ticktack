@@ -38,11 +38,11 @@ namespace ticktack {
 
     int ComputerPlayer::evaluate_triplet(Board const & board, Board::Position const (&triplet)[3], char player) {
         char const other = Board::other_player(player);
-        auto cnt = [player, other](char c){ return (c == player) ? 1 : ((c == other) ? -1 : 0); };
         int score = 0;
         for(auto const & pos : triplet) {
-            score += cnt(board.at(pos));
+            score += decode(board.at(pos), player, 1, other, -1, 0);
         }
+        return score;
     }
 
     int ComputerPlayer::evaluate(Board const & board, char player) {

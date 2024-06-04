@@ -8,16 +8,27 @@
 
 namespace ticktack {
 
-     static constexpr auto decode(auto const & expr, auto A, auto B, auto ... args) {
-        if (expr == A)
-            return B;
-        return decode(expr, args...);
-    }
-
-     static constexpr auto decode(auto const & expr, auto A, auto B, auto C) {
+    /**
+     * @brief      If expr == A then return B else return C
+     * The function always expects an odd number of arguments.
+     *
+     * @param      expr  The expression
+     * @param[in]  A     { parameter_description }
+     * @param[in]  B     { parameter_description }
+     * @param[in]  C     { parameter_description }
+     *
+     * @return     { description_of_the_return_value }
+     */
+     constexpr auto decode(auto const & expr, auto A, auto B, auto C) {
         if (expr == A)
             return B;
         return C;
+    }
+
+     constexpr auto decode(auto const & expr, auto A, auto B, auto ... args) {
+        if (expr == A)
+            return B;
+        return decode(expr, args...);
     }
 
     class Board {
@@ -26,6 +37,8 @@ namespace ticktack {
         static constexpr char CHAR_VOID = ' ';
         static constexpr char CHAR_X = 'X';
         static constexpr char CHAR_O = 'O';
+
+        static constexpr char players[] = {CHAR_O, CHAR_X};
 
         struct Position {
             uint8_t x_, y_;
@@ -122,15 +135,7 @@ namespace ticktack {
         }
         static constexpr char other_player(char player) {
             validate_char(player);
-            switch (player) {
-            case CHAR_O:
-                return CHAR_X;
-                break;
-            case CHAR_X:
-                return CHAR_O;
-                break;
-            }
-            return player;
+            return decode(player, CHAR_O, CHAR_X, CHAR_X, CHAR_O, player);
         }
     protected:
     private:
@@ -149,8 +154,8 @@ namespace ticktack {
     class ComputerPlayer
     {
     public:
-        ComputerPlayer();
-        ~ComputerPlayer();
+        ComputerPlayer() = default;
+        ~ComputerPlayer() = default;
         int evaluate_triplet(Board const & board, Board::Position const (&triplet)[3], char player);
         int evaluate(Board const & board, char player);
         Board::Position next_move(Board const & board);

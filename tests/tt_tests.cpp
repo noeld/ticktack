@@ -78,17 +78,24 @@ TEST_CASE("Check clear") {
     }
 }
 
+auto three(ticktack::Board& b, char player, int dx, int dy, unsigned initial_x = 0, unsigned initial_y = 0) {
+    unsigned x = initial_x;
+    unsigned y = initial_y;
+    for(auto i = 0u; i < 3u;
+        ++i, x = (unsigned)((int)(x) + dx), y = (unsigned)((int)(y) + dy))
+    {
+        b.at(x, y) = player;
+    }
+};
+auto three(ticktack::Board& b, char player, ticktack::Board::Position const (&triplet)[3]) {
+    for(auto const & pos : triplet)
+    {
+        b.set(pos, player);
+    }
+};
+
 TEST_CASE("Check win condition") {
     ticktack::Board b;
-    auto three = [](ticktack::Board& b, char player, int dx, int dy, unsigned initial_x = 0, unsigned initial_y = 0) {
-        unsigned x = initial_x;
-        unsigned y = initial_y;
-        for(auto i = 0u; i < 3u;
-            ++i, x = (unsigned)((int)(x) + dx), y = (unsigned)((int)(y) + dy))
-        {
-            b.at(x, y) = player;
-        }
-    };
     SUBCASE("negative win condition") {
         b.clear();
         auto result = b.check_winner();
@@ -254,8 +261,34 @@ TEST_CASE("Check other_player") {
 
 TEST_CASE("Check decode") {
     CHECK(ticktack::decode(1, 1, '1', '0') == '1');
-    CHECK(ticktack::decode(0, 1, '1', '0', 1, '1', ' ') == '0');
-    CHECK(ticktack::decode('X', 1, '1', '0') == '1');
+    CHECK(ticktack::decode(0, 1, '1', 2, '2', 0, '5', ' ') == '5');
+    CHECK(ticktack::decode('X', 1, '1', '0') == '0');
     CHECK(ticktack::decode(1, 1, '1', '0') == '1');
-    CHECK(ticktack::decode(1, 1, '1', '0') == '1');
+}
+
+TEST_CASE("Check evaluate") {
+    ticktack::Board b;
+    ticktack::ComputerPlayer cp;
+    SUBCASE("0 for empty board") {
+        for(auto p : ticktack::Board::players) {
+            b.clear();
+            auto evaluate_result = cp.evaluate(b, p);
+            CHECK(evaluate_result == 0);
+        }
+    }
+    SUBCASE("10 for win, -10 for loose") {
+        for(auto p : ticktack::Board::players) {
+            for(auto const & triplet : ticktack::Board::triplets) {
+                auto other = ticktack::Board::other_player(p);
+                b.clear();
+                three(b, p, triplet);
+                CHECK(cp.evaluate(b, p) == 10);
+                b.clear();
+                three(b, other, triplet);
+                CHECK(cp.evaluate(b, p) == -10);
+            }
+
+        }
+    }
+
 }
