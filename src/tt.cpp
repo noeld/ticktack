@@ -1,4 +1,6 @@
 #include "ticktack/tt.h"
+#include <iterator>
+#include <limits>
 
 namespace ticktack {
 
@@ -48,15 +50,43 @@ namespace ticktack {
     int ComputerPlayer::evaluate(Board const & board, char player) {
         auto result = board.check_winner();
         if (result.value_or(Board::CHAR_VOID) == player)
-            return 10;
+            return score_win;
         else if (result.value_or(Board::CHAR_VOID) != Board::CHAR_VOID)
-            return -10;
-
-        return 0;
+            return score_loss;
+        int score = 0;
+        for(auto const & t: Board::triplets) {
+            score += evaluate_triplet(board, t, player);
+        }
+        return score;
     }
 
-    Board::Position ComputerPlayer::next_move(Board const & board) {
-        return Board::Position::bottom_left;
+    // https://de.wikipedia.org/wiki/Minimax-Algorithmus
+    int ComputerPlayer::next_move(Board& board, char player, int return_depth, int depth, std::optional<Board::Position>& best_move)
+    {
+        if (depth == 0 || board.check_winner().has_value() || board.possible_moves().empty())
+            return evaluate(board, player);
+        int max_score = std::numeric_limits<int>::lowest();
+        std::vector<Board::Position>moves;
+        board.possible_moves(std::back_inserter(moves));
+        while(!moves.empty()) {
+            auto move = moves.back();
+            moves.pop_back();
+            board.set(move, player);
+            auto score = -next_move(board, Board::other_player(player), return_depth, depth - 1, best_move);
+            board.set(move, Board::CHAR_VOID);
+            if (score > max_score) {
+                max_score = score;
+                if (depth == return_depth)
+                    best_move = move;
+            }
+        }
+        return max_score;
+    }
+
+    auto ComputerPlayer::next_move(Board board, char player) -> std::optional<Board::Position> {
+        std::optional<Board::Position> best_move;
+        [[maybe_unused]] auto score = next_move(board, player, depth_, depth_, best_move);
+        return best_move;
     }
 
 }

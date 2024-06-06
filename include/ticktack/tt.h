@@ -1,10 +1,13 @@
 #pragma once
-
+#include <sstream>
 #include <algorithm>
 #include <cstdint>
+#include <iterator>
 #include <optional>
+#include <ranges>
 #include <stdexcept>
 #include <array>
+#include <vector>
 
 namespace ticktack {
 
@@ -60,6 +63,16 @@ namespace ticktack {
             }
             bool operator==(Position const &) const noexcept = default;
 
+            operator std::string() const {
+                std::ostringstream oss;
+                oss << "(" << x_ << ", " << y_ << ")";
+                return oss.str();
+            }
+
+            friend std::ostream& operator<<(std::ostream& out, Position const & pos) {
+                return out << "(" << pos.x_ << ", " << pos.y_ << ")";
+            }
+
             static Position const top_left;
             static Position const top_middle;
             static Position const top_right;
@@ -105,6 +118,41 @@ namespace ticktack {
             std::ranges::copy(data, data_.begin());
         }
 
+        constexpr auto possible_moves() const {
+            return Board::Position::all_positions
+                | std::views::filter([&](Position const &p) {
+                    return at(p) == CHAR_VOID;
+                });
+        }
+
+        constexpr void possible_moves(auto back_inserter) const {
+            std::ranges::copy(possible_moves(), back_inserter);
+        }
+
+        constexpr auto end() const noexcept { return data_.end(); }
+
+        /**
+         * @brief      Turn a string into a board state.
+         * Use X and O and _ for empty fields. All other characters are ignored
+         *
+         * @param[in]  sv    { parameter_description }
+         *
+         * @return     The data type.
+         */
+        static constexpr data_type board_state_from_string(std::string_view sv) {
+            data_type tmp;
+            size_t i = 0;
+            for(auto c : sv) {
+                c = decode(c, '_', CHAR_VOID, CHAR_VOID, '*', c);
+                if (std::ranges::find(valid_chars, c) == std::end(valid_chars))
+                    continue;
+                tmp[i++] = c;
+                if (i > tmp.size())
+                    break;
+            }
+            return tmp;
+        }
+
         static Position const triplets[8][3];
         auto check_winner() const -> std::optional<typename data_type::value_type> {
             for(auto const & t : triplets) {
@@ -144,8 +192,15 @@ namespace ticktack {
 
     class BoardTUIControllerView {
     public:
-        void print(Board const & board) {
-
+        std::string to_string(Board const & board) {
+            std::string str;
+            str.reserve(9 + 9);
+            for(size_t i = 0; i < Board::Position::all_positions.size(); ++i) {
+                auto const & pos = Board::Position::all_positions[i];
+                str += board.at(pos);
+                str += (i % 3 == 2) ? '\n' : '|';
+            }
+            return str;
         }
     protected:
     private:
@@ -154,11 +209,16 @@ namespace ticktack {
     class ComputerPlayer
     {
     public:
+        static constexpr int score_win = 10;
+        static constexpr int score_loss = -score_win;
         ComputerPlayer() = default;
         ~ComputerPlayer() = default;
         int evaluate_triplet(Board const & board, Board::Position const (&triplet)[3], char player);
         int evaluate(Board const & board, char player);
-        Board::Position next_move(Board const & board);
+        auto next_move(Board board, char player) -> std::optional<Board::Position>;
+    protected:
+        int next_move(Board& board, char player,  int return_depth, int depth, std::optional<Board::Position>& best_move);
+        int depth_ { 4 };
     };
 
 } // namespace ticktack

@@ -1,9 +1,11 @@
 #include <algorithm>
 #include <initializer_list>
+#include <iterator>
 #include <limits>
 #include <optional>
 #include <random>
 #include <stdexcept>
+#include <vector>
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 
@@ -27,6 +29,8 @@ auto random_board() {
     std::ranges::generate(dt, board_randomizer());
     return dt;
 }
+
+
 
 TEST_CASE("Test class Board") {
 
@@ -266,6 +270,22 @@ TEST_CASE("Check decode") {
     CHECK(ticktack::decode(1, 1, '1', '0') == '1');
 }
 
+TEST_CASE("Check possible_moves") {
+    ticktack::Board b;
+    auto bd = random_board();
+    b.set_state(bd);
+    std::vector<ticktack::Board::Position> pos;
+    std::ranges::copy(b.possible_moves(), std::back_inserter(pos));
+    auto empty = 0;
+    for(auto c : bd)
+        empty += (c == ticktack::Board::CHAR_VOID) ? 1 : 0;
+    CHECK(pos.size() == empty);
+    for(auto const & p : pos) {
+        CHECK(b.at(p) == ticktack::Board::CHAR_VOID);
+    }
+
+}
+
 TEST_CASE("Check evaluate") {
     ticktack::Board b;
     ticktack::ComputerPlayer cp;
@@ -290,5 +310,50 @@ TEST_CASE("Check evaluate") {
 
         }
     }
+    SUBCASE("Evaluate") {
+        auto state = ticktack::Board::board_state_from_string(R"*(XO_|OXO|___)*");
+        b.set_state(state);
+        ticktack::BoardTUIControllerView cv;
+        auto s = cv.to_string(b);
+        CHECK(s.length() == 18);
+        auto score_x = cp.evaluate(b, 'X');
+        auto score_o = cp.evaluate(b, 'O');
+        CHECK(score_x > 0);
+        CHECK(score_o < 0);
+    }
+        SUBCASE("Evaluate win") {
+            auto state = ticktack::Board::board_state_from_string(R"*(XO_|OXO|__X)*");
+            b.set_state(state);
+            auto score_x = cp.evaluate(b, 'X');
+            auto score_o = cp.evaluate(b, 'O');
+            CHECK(score_x == ticktack::ComputerPlayer::score_win);
+            CHECK(score_o == ticktack::ComputerPlayer::score_loss);
+        }
+}
 
+TEST_CASE("Check next_move") {
+    using ticktack::Board;
+    Board b;
+    ticktack::ComputerPlayer cp;
+    std::tuple<Board::data_type, char, Board::Position> test_cases[] = {
+        {Board::board_state_from_string("XO_|OXO|___"), Board::CHAR_X, Board::Position::bottom_right},
+        {Board::board_state_from_string("XO_|OXO|___"), Board::CHAR_O, Board::Position::bottom_right},
+        {Board::board_state_from_string("XO_|XO_|___"), Board::CHAR_X, Board::Position::bottom_left},
+        {Board::board_state_from_string("XO_|XO_|___"), Board::CHAR_O, Board::Position::bottom_middle},
+        {Board::board_state_from_string("XO_|_O_|___"), Board::CHAR_X, Board::Position::bottom_middle},
+        {Board::board_state_from_string("OX_|_X_|___"), Board::CHAR_O, Board::Position::bottom_middle},
+        {Board::board_state_from_string("XOX|OX_|___"), Board::CHAR_X, Board::Position::bottom_right},
+        {Board::board_state_from_string("XOX|OX_|___"), Board::CHAR_O, Board::Position::bottom_right},
+        {Board::board_state_from_string("X_O|O__|X_X"), Board::CHAR_O, Board::Position::bottom_middle},
+    };
+    SUBCASE("Evaluate situations") {
+        for(auto const & test_case : test_cases) {
+            auto const & [state, player, expected] = test_case;
+            b.set_state(state);
+            auto next_move = cp.next_move(b, player);
+            CHECK(next_move.has_value());
+            CHECK(next_move.value() == expected);
+        }
+
+    }
 }
