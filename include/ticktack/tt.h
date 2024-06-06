@@ -44,8 +44,9 @@ namespace ticktack {
         static constexpr char players[] = {CHAR_O, CHAR_X};
 
         struct Position {
-            uint8_t x_, y_;
+            uint8_t x_{0}, y_{0};
 
+            Position() = default;
             Position(Position const &) = default;
             Position& operator=(Position const &) = default;
 
@@ -83,6 +84,9 @@ namespace ticktack {
             static Position const bottom_middle;
             static Position const bottom_right;
             static std::array<Position, 9> const all_positions;
+
+            static Position const none;
+            constexpr bool is_none() const noexcept { return *this == none; }
 
         private:
             Position(uint8_t x, uint8_t y) : x_{x}, y_{y} {

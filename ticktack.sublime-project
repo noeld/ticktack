@@ -30,6 +30,23 @@
 			"variants":
 			[
 				{
+					"build_target": "fixed_stack_tests",
+					"name": "fixed_stack_tests",
+				},
+				{
+					"artifact": "tests/fixed_stack_tests",
+					"build_target": "fixed_stack_tests",
+					"name": "Run: fixed_stack_tests",
+					"target": "cmake_run",
+				},
+				{
+					"artifact": "tests/fixed_stack_tests",
+					"build_target": "fixed_stack_tests",
+					"debug": true,
+					"name": "Run under GDB: fixed_stack_tests",
+					"target": "cmake_run",
+				},
+				{
 					"build_target": "ticktack",
 					"name": "ticktack",
 				},
@@ -47,26 +64,31 @@
 					"target": "cmake_run",
 				},
 				{
+					"name": "tt",
+					/*"target": "ctest_run",*/
+					"build_target": "tt",
+				},
+				{
 					"build_target": "tt_tests",
-					"name": "tt_tests",
+					"name": "tt_tests"
 				},
 				{
 					"artifact": "tests/tt_tests",
 					"build_target": "tt_tests",
 					"name": "Run: tt_tests",
-					"target": "cmake_run",
+					"target": "cmake_run"
 				},
 				{
 					"artifact": "tests/tt_tests",
 					"build_target": "tt_tests",
 					"debug": true,
 					"name": "Run under GDB: tt_tests",
-					"target": "cmake_run",
+					"target": "cmake_run"
 				},
 				{
 					"name": "ctest",
-					"target": "ctest_run",
-				}
+					"target": "ctest_run"
+				},
 			],
 			"working_dir": "$folder/build",
 		}
@@ -79,7 +101,7 @@
 			"name": "Launch tt_tests",
 			"program": "${folder}/build/tests/tt_tests",
 			"args": [],
-			"cwd": "${folder}"
+			"cwd": "${folder}",
 		},
 	],
 }

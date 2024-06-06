@@ -1,4 +1,5 @@
 #include "ticktack/tt.h"
+#include "ticktack/fixed_stack.h"
 #include <iterator>
 #include <limits>
 
@@ -66,11 +67,11 @@ namespace ticktack {
         if (depth == 0 || board.check_winner().has_value() || board.possible_moves().empty())
             return evaluate(board, player);
         int max_score = std::numeric_limits<int>::lowest();
-        std::vector<Board::Position>moves;
+        ticktock::fixed_stack<Board::Position, 9> moves;
         board.possible_moves(std::back_inserter(moves));
         while(!moves.empty()) {
-            auto move = moves.back();
-            moves.pop_back();
+            auto move = moves.top();
+            moves.pop();
             board.set(move, player);
             auto score = -next_move(board, Board::other_player(player), return_depth, depth - 1, best_move);
             board.set(move, Board::CHAR_VOID);

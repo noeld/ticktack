@@ -335,21 +335,21 @@ TEST_CASE("Check next_move") {
     using ticktack::Board;
     Board b;
     ticktack::ComputerPlayer cp;
-    std::tuple<Board::data_type, char, Board::Position> test_cases[] = {
-        {Board::board_state_from_string("XO_|OXO|___"), Board::CHAR_X, Board::Position::bottom_right},
-        {Board::board_state_from_string("XO_|OXO|___"), Board::CHAR_O, Board::Position::bottom_right},
-        {Board::board_state_from_string("XO_|XO_|___"), Board::CHAR_X, Board::Position::bottom_left},
-        {Board::board_state_from_string("XO_|XO_|___"), Board::CHAR_O, Board::Position::bottom_middle},
-        {Board::board_state_from_string("XO_|_O_|___"), Board::CHAR_X, Board::Position::bottom_middle},
-        {Board::board_state_from_string("OX_|_X_|___"), Board::CHAR_O, Board::Position::bottom_middle},
-        {Board::board_state_from_string("XOX|OX_|___"), Board::CHAR_X, Board::Position::bottom_right},
-        {Board::board_state_from_string("XOX|OX_|___"), Board::CHAR_O, Board::Position::bottom_right},
-        {Board::board_state_from_string("X_O|O__|X_X"), Board::CHAR_O, Board::Position::bottom_middle},
+    std::tuple<std::string, char, Board::Position> test_cases[] = {
+        {"XO_|OXO|___", Board::CHAR_X, Board::Position::bottom_right},
+        {"XO_|OXO|___", Board::CHAR_O, Board::Position::bottom_right},
+        {"XO_|XO_|___", Board::CHAR_X, Board::Position::bottom_left},
+        {"XO_|XO_|___", Board::CHAR_O, Board::Position::bottom_middle},
+        {"XO_|_O_|___", Board::CHAR_X, Board::Position::bottom_middle},
+        {"OX_|_X_|___", Board::CHAR_O, Board::Position::bottom_middle},
+        {"XOX|OX_|___", Board::CHAR_X, Board::Position::bottom_right},
+        {"XOX|OX_|___", Board::CHAR_O, Board::Position::bottom_right},
+        {"X_O|O__|X_X", Board::CHAR_O, Board::Position::bottom_middle},
     };
     SUBCASE("Evaluate situations") {
         for(auto const & test_case : test_cases) {
             auto const & [state, player, expected] = test_case;
-            b.set_state(state);
+            b.set_state(Board::board_state_from_string(state));
             auto next_move = cp.next_move(b, player);
             CHECK(next_move.has_value());
             CHECK(next_move.value() == expected);
