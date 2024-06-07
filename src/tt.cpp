@@ -68,8 +68,10 @@ namespace ticktack {
     // https://de.wikipedia.org/wiki/Minimax-Algorithmus
     int ComputerPlayer::next_move(Board& board, char player, int return_depth, int depth, std::optional<Board::Position>& best_move)
     {
-        if (depth == 0 || board.check_winner().has_value() || board.possible_moves().empty())
-            return evaluate(board, player);
+        if (depth == 0 || board.check_winner().has_value() || board.possible_moves().empty()) {
+            int score = evaluate(board, player);
+            return score * depth; // the sooner the better/worse
+        }
         int max_score = std::numeric_limits<int>::lowest();
         ticktock::fixed_stack<Board::Position, 9> moves;
         board.possible_moves(std::back_inserter(moves));
@@ -126,8 +128,13 @@ namespace ticktack {
         return Board::Position::all_positions[move_idx];
     }
 
-    void BoardTUIControllerView::announce_winner(char player) {
-        std::cout << "*** Winner is: " << player << " ***\n";
+    void BoardTUIControllerView::announce_result(std::optional<Board::value_type> const & winner) {
+        if (winner.has_value()) {
+            auto emoji = decode(winner.value(), Board::CHAR_X, "🤗", "😛");
+            std::cout << "*** Winner is: " << emoji << " " << winner.value() << " " << emoji << " ***\n";
+        } else {
+            std::cout << "*** Draw 🫣 ***\n";
+        }
     }
 
     Game Game::create_game() {

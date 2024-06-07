@@ -321,14 +321,14 @@ TEST_CASE("Check evaluate") {
         CHECK(score_x > 0);
         CHECK(score_o < 0);
     }
-        SUBCASE("Evaluate win") {
-            auto state = ticktack::Board::board_state_from_string(R"*(XO_|OXO|__X)*");
-            b.set_state(state);
-            auto score_x = cp.evaluate(b, 'X');
-            auto score_o = cp.evaluate(b, 'O');
-            CHECK(score_x == ticktack::ComputerPlayer::score_win);
-            CHECK(score_o == ticktack::ComputerPlayer::score_loss);
-        }
+    SUBCASE("Evaluate win") {
+        auto state = ticktack::Board::board_state_from_string(R"*(XO_|OXO|__X)*");
+        b.set_state(state);
+        auto score_x = cp.evaluate(b, 'X');
+        auto score_o = cp.evaluate(b, 'O');
+        CHECK(score_x == ticktack::ComputerPlayer::score_win);
+        CHECK(score_o == ticktack::ComputerPlayer::score_loss);
+    }
 }
 
 TEST_CASE("Check next_move") {
@@ -345,6 +345,7 @@ TEST_CASE("Check next_move") {
         {"XOX|OX_|___", Board::CHAR_X, Board::Position::bottom_right},
         {"XOX|OX_|___", Board::CHAR_O, Board::Position::bottom_right},
         {"X_O|O__|X_X", Board::CHAR_O, Board::Position::bottom_middle},
+        {"___|XOX|__O", Board::CHAR_O, Board::Position::top_left},
     };
     SUBCASE("Evaluate situations") {
         for(auto const & test_case : test_cases) {
@@ -354,7 +355,6 @@ TEST_CASE("Check next_move") {
             CHECK(next_move.has_value());
             CHECK(next_move.value() == expected);
         }
-
     }
 }
 
@@ -364,4 +364,46 @@ TEST_CASE("Check create_game") {
     CHECK_NOTHROW(game.board());
     CHECK_NOTHROW(game.controller_view());
     CHECK_NOTHROW(game.computer_player());
+}
+
+TEST_CASE("Weird situation") {
+    //   |   |
+    // X | O | X
+    //   |   | O
+    // next move of O: (why not top_left?)
+    //   |   |
+    // X | O | X
+    //   | O | O
+
+    ticktack::Game game = ticktack::Game::create_game();
+    auto state = ticktack::Board::board_state_from_string("___|XOX|__O");
+    game.board().set_state(state);
+
+    auto& board = game.board();
+    auto& cp = game.computer_player();
+
+    SUBCASE("Evaluate") {
+
+        auto score_x = game.computer_player().evaluate(game.board(), ticktack::Board::CHAR_X);
+        CHECK(score_x == -3);
+        auto score_o = game.computer_player().evaluate(game.board(), ticktack::Board::CHAR_O);
+        CHECK(score_o == 3);
+
+        game.board().set(ticktack::Board::Position::top_left, ticktack::Board::CHAR_O);
+
+        score_x = game.computer_player().evaluate(game.board(), ticktack::Board::CHAR_X);
+        CHECK(score_x == ticktack::ComputerPlayer::score_loss);
+        score_o = game.computer_player().evaluate(game.board(), ticktack::Board::CHAR_O);
+        CHECK(score_o == ticktack::ComputerPlayer::score_win);
+    }
+
+    SUBCASE("next_move") {
+        auto next_move_x = cp.next_move(board, ticktack::Board::CHAR_X);
+        CHECK(next_move_x.has_value());
+        CHECK(next_move_x.value() == ticktack::Board::Position::top_left);
+
+        auto next_move_o = cp.next_move(board, ticktack::Board::CHAR_O);
+        CHECK(next_move_o.has_value());
+        CHECK(next_move_o.value() == ticktack::Board::Position::top_left);
+    }
 }

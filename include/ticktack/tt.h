@@ -38,6 +38,8 @@ namespace ticktack {
     class Board {
     public:
         using data_type = std::array<char, 3 * 3>;
+        using value_type = data_type::value_type;
+
         static constexpr char CHAR_VOID = ' ';
         static constexpr char CHAR_X = 'X';
         static constexpr char CHAR_O = 'O';
@@ -209,7 +211,7 @@ namespace ticktack {
         }
         void print(Board const & board);
         auto next_human_move(Board const & board) -> std::optional<Board::Position>;
-        void announce_winner(char player);
+        void announce_result(std::optional<Board::value_type> const & winner);
     protected:
     private:
     };
@@ -224,6 +226,13 @@ namespace ticktack {
         int evaluate_triplet(Board const & board, Board::Position const (&triplet)[3], char player);
         int evaluate(Board const & board, char player);
         auto next_move(Board board, char player) -> std::optional<Board::Position>;
+        int depth() const { return depth_; }
+        /**
+         * @brief      Sets the depth
+         *
+         * @param[in]  new_depth  The new depth between 1 (weaker) and 9 (stronger)
+         */
+        void set_depth(int new_depth) { depth_ = std::clamp(new_depth, 1, 9); }
     protected:
         int next_move(Board& board, char player,  int return_depth, int depth, std::optional<Board::Position>& best_move);
         int depth_ { 4 };
