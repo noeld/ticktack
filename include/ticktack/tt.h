@@ -1,4 +1,5 @@
 #pragma once
+#include <memory>
 #include <sstream>
 #include <algorithm>
 #include <cstdint>
@@ -206,6 +207,9 @@ namespace ticktack {
             }
             return str;
         }
+        void print(Board const & board);
+        auto next_human_move(Board const & board) -> std::optional<Board::Position>;
+        void announce_winner(char player);
     protected:
     private:
     };
@@ -225,4 +229,29 @@ namespace ticktack {
         int depth_ { 4 };
     };
 
+    class Game;
+
+
+    class Game {
+    public:
+        Board& board() { return *board_; }
+        BoardTUIControllerView& controller_view() { return *controller_view_; }
+        ComputerPlayer& computer_player() { return *computer_player_; }
+
+        static Game create_game();
+    private:
+        std::unique_ptr<Board> board_;
+        std::unique_ptr<BoardTUIControllerView> controller_view_;
+        std::unique_ptr<ComputerPlayer> computer_player_;
+    };
+
+
 } // namespace ticktack
+
+namespace std {
+    template<> struct hash<ticktack::Board::Position> {
+        size_t operator()(ticktack::Board::Position const & p) const {
+            return p.x_ + 3 * p.y_;
+        }
+    };
+}

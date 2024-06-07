@@ -357,3 +357,11 @@ TEST_CASE("Check next_move") {
 
     }
 }
+
+TEST_CASE("Check create_game") {
+    REQUIRE_NOTHROW(ticktack::Game::create_game());
+    ticktack::Game game = ticktack::Game::create_game();
+    CHECK_NOTHROW(game.board());
+    CHECK_NOTHROW(game.controller_view());
+    CHECK_NOTHROW(game.computer_player());
+}

@@ -98,6 +98,14 @@
 		{
 			"type": "lldb",
 			"request": "launch",
+			"name": "Launch ticktack",
+			"program": "${folder}/build/ticktack",
+			"args": [],
+			"cwd": "${folder}",
+		},
+		{
+			"type": "lldb",
+			"request": "launch",
 			"name": "Launch tt_tests",
 			"program": "${folder}/build/tests/tt_tests",
 			"args": [],

@@ -1,7 +1,11 @@
 #include "ticktack/tt.h"
 #include "ticktack/fixed_stack.h"
+#include <algorithm>
+#include <iostream>
 #include <iterator>
 #include <limits>
+#include <memory>
+#include <unordered_set>
 
 namespace ticktack {
 
@@ -88,6 +92,51 @@ namespace ticktack {
         std::optional<Board::Position> best_move;
         [[maybe_unused]] auto score = next_move(board, player, depth_, depth_, best_move);
         return best_move;
+    }
+
+    void BoardTUIControllerView::print(Board const & board) {
+        auto c = [&](int i) -> char const & { return board.at(Board::Position::all_positions[i]); };
+        std::cout << ' ' << c(0) << " | " << c(1) << " | " << c(2) << '\n';
+        std::cout << ' ' << c(3) << " | " << c(4) << " | " << c(5) << '\n';
+        std::cout << ' ' << c(6) << " | " << c(7) << " | " << c(8) << '\n';
+        std::cout << '\n';
+    }
+
+    auto BoardTUIControllerView::next_human_move(Board const & board)
+    -> std::optional<Board::Position> {
+        std::unordered_set<Board::Position> possible_moves;
+        board.possible_moves(std::inserter(possible_moves, possible_moves.end()));
+        if (possible_moves.size() == 0) {
+            std::cout << "No more possible moves!\n";
+            return {};
+        }
+        auto p = [&](int i) -> char {
+            return possible_moves.contains(Board::Position::all_positions[i]) ? i + '0' : ' ';
+        };
+        std::cout << ' ' << p(0) << " | " << p(1) << " | " << p(2) << '\n';
+        std::cout << ' ' << p(3) << " | " << p(4) << " | " << p(5) << '\n';
+        std::cout << ' ' << p(6) << " | " << p(7) << " | " << p(8) << '\n';
+        std::cout << "Press number of your next move for X: ";
+        std::cout << '\n';
+        int move_idx;
+        do {
+            std::cin >> move_idx;
+            move_idx = std::clamp(move_idx, 0, (int)Board::Position::all_positions.size());
+        } while(!possible_moves.contains(Board::Position::all_positions[move_idx]));
+        return Board::Position::all_positions[move_idx];
+    }
+
+    void BoardTUIControllerView::announce_winner(char player) {
+        std::cout << "*** Winner is: " << player << " ***\n";
+    }
+
+    Game Game::create_game() {
+        Game game;
+        game.board_ = std::make_unique<Board>();
+        game.controller_view_ = std::make_unique<BoardTUIControllerView>();
+        game.computer_player_ = std::make_unique<ComputerPlayer>();
+        game.board().clear();
+        return game;
     }
 
 }
